@@ -1,1 +1,1 @@
-# This project is to demonstrate the submodule gate and guardrai
+# This project is to demonstrate the submodule gate and guardrail
