@@ -46,4 +46,17 @@ jobs:
           submodules: recursive
           # If submodules are private, use a PAT with repo access
           # token: ${{ secrets.YOUR_PAT_TOKEN }}
+          # very important, public repo does not require token, however private repo does
+
+      - name: Install Submodule Dependenciies (if any)
+        run: |
+          cd DockerJenkinsPipeline
+          echo I am in the Docker Jenkins Pipeline Child Repo
+          echo install dependencies
+
+      - name: Run Submodule Tests
+        run: |
+          cd DockerJenkinsPipeline
+          echo I am running submodule tests
+          ./startup.sh
           
