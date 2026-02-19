@@ -30,13 +30,15 @@ jobs:
         run: echo Hello, world!
 
       # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Run sample scripts
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+
   check-submodule-tests:
     runs-on: ubuntu-latest
     steps:
+    # Step 1: Check out the pareent and Submodule repository (including submodule)
       - name: Checkout Parent Repository and Submodules
         uses: actions/checkout@v4
         with:
@@ -61,3 +63,43 @@ jobs:
         run: |
           cd path/to/your/submodule
           npm test # Or the command that runs your tests
+
+ # Step 2: Determine the Current Commit Hash for the Submodule
+      - name: Get Submodule SHA & Config
+        id: submodule-info
+        run: |
+          # Extracting submodule commit hash and its repository URL
+          SUBMODULE_PATH=$(git config --file .gitmodules --get submodule.child_repo.path)
+          SUBMODULE_URL=$(git config --file .gitmodules --get submodule.child_repo.url)
+          SUBMODULE_COMMIT_HASH=$(git ls-tree HEAD $SUBMODULE_PATH | awk '{print $3}')
+
+          echo "Submodule Path: $SUBMODULE_PATH"
+          echo "Submodule URL: $SUBMODULE_URL"
+          echo "Current Submodule Commit Hash: $SUBMODULE_COMMIT_HASH"
+
+          # Make variables available for the next step
+          echo "::set-output name=path::$SUBMODULE_PATH"
+          echo "::set-output name=url::$SUBMODULE_URL"
+          echo "::set-output name=hash::$SUBMODULE_COMMIT_HASH"
+
+      # Step 3: Validate Whether Submodule Hash Belongs to the Development Branch
+      - name: Validate Submodule Branch
+        run: |
+          SUBMODULE_URL=${{ steps.submodule-info.outputs.url }}
+          SUBMODULE_COMMIT_HASH=${{ steps.submodule-info.outputs.hash }}
+
+          echo "Validating submodule branch..."
+          
+          # Clone the submodule repository
+          git clone $SUBMODULE_URL submodule-check
+          cd submodule-check
+
+          # Ensure commit belongs to the 'development' branch of the submodule
+          git fetch origin development
+          
+          if git merge-base --is-ancestor $SUBMODULE_COMMIT_HASH origin/development; then
+            echo "Submodule commit is part of the development branch. Validation Passed."
+          else
+            echo "::error::Submodule commit does NOT belong to the development branch. PR is rejected."
+            exit 1
+          fi
