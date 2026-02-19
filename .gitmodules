@@ -1,0 +1,3 @@
+[submodule "DockerJenkinsPipeline"]
+	path = DockerJenkinsPipeline
+	url = git@github.com:HelenHeNGC/DockerJenkinsPipeline.git
