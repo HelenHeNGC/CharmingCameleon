@@ -103,3 +103,13 @@ jobs:
             echo "::error::Submodule commit does NOT belong to the development branch. PR is rejected."
             exit 1
           fi
+    # Step 4: run submodule dependencies and tests
+      - name: Install Submodule Dependencies (if any)
+        run: |
+          cd path/to/your/submodule
+          npm install # Or the appropriate command (e.g., pip install)
+
+      - name: Run Submodule Tests
+        run: |
+          cd path/to/your/submodule
+          npm test # Or the command that runs your tests
